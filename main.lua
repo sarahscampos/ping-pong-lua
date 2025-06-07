@@ -58,8 +58,8 @@ function love.load()
     player2Score = 0
     
     -- inicializa as raquetes
-    player1Y = Paddle(10, 30, 5, 20)
-    player2Y = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, 5, 20)
+    player1 = Paddle(10, 30, 5, 20)
+    player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, 5, 20)
 
     -- posiciona a bola no meio da tela
     ball = Ball(VIRTUAL_WIDTH / 2 - 2, VIRTUAL_HEIGHT / 2 - 2, 4, 4)
@@ -139,10 +139,18 @@ function love.draw()
     player1:render()
 
     --renderiza segunda raquete (direita)
-    player2Y:render()
+    player2:render()
 
     --renderiza bola (centro)
     ball:render()
 
+    displayFPS()
+
     push:apply('end')
+end
+
+function displayFPS()
+    love.graphics.setFont(smallFont)
+    love.graphics.setColor(0, 255, 0, 255)
+    love.graphics.print("FPS: " .. tostring(love.timer.getFPS()), 10, 10)
 end
