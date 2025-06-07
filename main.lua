@@ -73,7 +73,7 @@ function love.update(dt)
     if gameState == "play" then
         -- detecta a colisao da bola com as raquetes e inverte o dx se verdadedeiro alem de aumentar um pouco sua velocidade
         if ball:collides(player1) then
-            ball.dx = -ball.dx * 1.03
+            ball.dx = -ball.dx * 1.05
             ball.x = player1.x + 5 -- evita que detecte multiplas colisoes
             -- mantem a direcao e sentido da bola
             if ball.dy < 0 then
@@ -83,7 +83,7 @@ function love.update(dt)
             end
         end
             if ball:collides(player2) then
-                ball.dx = -ball.dx * 1.03
+                ball.dx = -ball.dx * 1.05
                 ball.x = player2.x - 4 -- evita que detecte multiplas colisoes
 
                 -- mantem a direcao e sentido da bola
@@ -106,6 +106,19 @@ function love.update(dt)
             ball.dy = -ball.dy
         end
 
+    end
+
+    -- se alcanca os limites esquerdo ou direito da tela, reseta a posicao da bola e atualiza o placar
+    if ball.x < 0 then
+        player2Score = player2Score + 1
+        ball:reset()
+        gameState = "serve"
+    end
+
+    if ball.x > VIRTUAL_WIDTH then
+        player1Score = player1Score + 1
+        ball:reset()
+        gameState = "serve"
     end
 
     -- movimento do jogador 1, no eixo Y pra cima e negativo e para baixo e positivo
