@@ -70,6 +70,44 @@ function love.load()
 end
 
 function love.update(dt)
+    if gameState == "play" then
+        -- detecta a colisao da bola com as raquetes e inverte o dx se verdadedeiro alem de aumentar um pouco sua velocidade
+        if ball:collides(player1) then
+            ball.dx = -ball.dx * 1.03
+            ball.x = player1.x + 5 -- evita que detecte multiplas colisoes
+            -- mantem a direcao e sentido da bola
+            if ball.dy < 0 then
+                ball.dy = -math.random(10, 150)
+            else
+                ball.dy = math.random(10, 150)
+            end
+        end
+            if ball:collides(player2) then
+                ball.dx = -ball.dx * 1.03
+                ball.x = player2.x - 4 -- evita que detecte multiplas colisoes
+
+                -- mantem a direcao e sentido da bola
+                if ball.dy < 0 then
+                    ball.dy = -math.random(10, 150)
+                else
+                    ball.dy = math.random(10, 150)
+                end
+        end
+
+        -- detecta limites superior e inferior (eixo y) da tela e inverte o dy se colidir
+        if ball.y <= 0 then
+            ball.y = 0
+            ball.dy = -ball.dy
+        end
+
+        -- 4 por causa do tamanho da bola
+        if ball.y >= VIRTUAL_HEIGHT - 4 then
+            ball.y = VIRTUAL_HEIGHT - 4
+            ball.dy = -ball.dy
+        end
+
+    end
+
     -- movimento do jogador 1, no eixo Y pra cima e negativo e para baixo e positivo
     if(love.keyboard.isDown("w")) then
         player1.dy = -PADDLE_SPEED
