@@ -47,11 +47,18 @@ function love.load()
     largeFont = love.graphics.newFont("font.ttf", 16)
     scoreFont = love.graphics.newFont("font.ttf", 32)
 
+    -- tabela para sons
+    sounds = {
+        ["paddle_hit"] = love.audio.newSource("sounds/paddle_hit.wav", "static"),
+        ["score"] = love.audio.newSource("sounds/score.wav", "static"),
+        ["wall_hit"] = love.audio.newSource("sounds/wall_hit.wav", "static")
+    }
+
     love.graphics.setFont(smallFont)
 
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
-        resizable = false,
+        resizable = true,
         vsync = true
     })
     player1Score = 0
@@ -74,6 +81,10 @@ function love.load()
 
 end
 
+function love.resize(w, h)
+    push:resize(w, h)
+end
+
 function love.update(dt)
     -- antes de mudar para play, inicializa a velocidade da bola baseada no jogador que pontuou por ultimo
     if gameState == "serve" then
@@ -94,6 +105,7 @@ function love.update(dt)
             else
                 ball.dy = math.random(10, 150)
             end
+            sounds['paddle_hit']:play()
         end
         if ball:collides(player2) then
             ball.dx = -ball.dx * 1.05
@@ -105,25 +117,29 @@ function love.update(dt)
             else
                 ball.dy = math.random(10, 150)
             end
+            sounds['paddle_hit']:play()
         end
 
         -- detecta limites superior e inferior (eixo y) da tela e inverte o dy se colidir
         if ball.y <= 0 then
             ball.y = 0
             ball.dy = -ball.dy
+            sounds['wall_hit']:play()
         end
 
         -- 4 por causa do tamanho da bola
         if ball.y >= VIRTUAL_HEIGHT - 4 then
             ball.y = VIRTUAL_HEIGHT - 4
             ball.dy = -ball.dy
+            sounds['wall_hit']:play()
         end
         
         -- se alcanca os limites esquerdo ou direito da tela, reseta a posicao da bola e atualiza o placar
         if ball.x < 0 then
             servingPlayer = 1
             player2Score = player2Score + 1
-            if player2Score == 3 then
+            sounds['score']:play()
+            if player2Score == 10 then
                 winningPlayer = 2
                 gameState = "done"
             else
@@ -135,8 +151,9 @@ function love.update(dt)
         if ball.x > VIRTUAL_WIDTH then
             servingPlayer = 2
             player1Score = player1Score + 1
+            sounds['score']:play()
     
-            if player1Score == 3 then
+            if player1Score == 10 then
                 winningPlayer = 1
                 gameState = "done"
             else
@@ -175,8 +192,8 @@ function love.update(dt)
 end
 
 
--- encerrar aplicação
 function love.keypressed(key)
+    -- encerrar aplicação
     if key == "escape" then
         love.event.quit()
     elseif key == 'enter' or key == 'return' then
@@ -185,9 +202,7 @@ function love.keypressed(key)
         elseif gameState == 'serve' then
             gameState = 'play'
         elseif gameState == 'done' then
-            -- game is simply in a restart phase here, but will set the serving
-            -- player to the opponent of whomever won for fairness!
-            -- reset scores to 0
+            -- jogo reseta
             player1Score = 0
             player2Score = 0
 
@@ -195,7 +210,7 @@ function love.keypressed(key)
             
             gameState = 'serve'
 
-            -- decide serving player as the opposite of who won
+            -- decide quem ira sacar, sendo quem perdeu na ultima rodada
             if winningPlayer == 1 then
                 servingPlayer = 2
             else
