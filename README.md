@@ -1,6 +1,6 @@
 # Pong em Lua com LÖVE2D 🏓
 
-Este projeto é uma recriação do clássico jogo **Pong**, originalmente lançado pela Atari em 1972. Foi desenvolvido como uma implementação prática da disciplina **Arquitetura de Linguagens de Programação**, utilizando a linguagem **Lua** e o framework **LÖVE2D**.
+Este projeto é uma recriação do clássico jogo **Pong**, originalmente lançado pela Atari em 1972. Foi desenvolvido como uma implementação prática da disciplina **Arquitetura de Linguagem de Programação**, utilizando a linguagem **Lua** e o framework **LÖVE2D**.
 
 ## Sobre o Jogo
 
