@@ -18,6 +18,11 @@ end
 
 push = require "push"
 
+Class = require "class"
+
+require "Paddle"
+require "Ball"
+
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
@@ -31,6 +36,8 @@ PADDLE_SPEED = 200
 function love.load()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
+
+    love.window.setTitle("Pong")
 
     -- seed aleatória usando os segundos desde 1 janeiro de 1970
     math.randomseed(os.time())
@@ -50,18 +57,14 @@ function love.load()
     player1Score = 0
     player2Score = 0
     
-    -- posicao das raquetes no eixo Y
-    player1Y = 30
-    player2Y = VIRTUAL_HEIGHT - 50
+    -- inicializa as raquetes
+    player1Y = Paddle(10, 30, 5, 20)
+    player2Y = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, 5, 20)
 
-    -- posicao da bola no eixo X e Y
-    ballX = VIRTUAL_WIDTH / 2 - 2
-    ballY = VIRTUAL_HEIGHT / 2 - 2
+    -- posiciona a bola no meio da tela
+    ball = Ball(VIRTUAL_WIDTH / 2 - 2, VIRTUAL_HEIGHT / 2 - 2, 4, 4)
 
-    -- velocidade da bola no eixo X e Y
-    ballDX = math.random(2) == 1 and 100 or -100
-    ballDY = math.random(-50, 50)
-
+    -- estado do jogo
     gameState = "start"
 
 end
@@ -69,25 +72,29 @@ end
 function love.update(dt)
     -- movimento do jogador 1, no eixo Y pra cima e negativo e para baixo e positivo
     if(love.keyboard.isDown("w")) then
-        -- garante que a raquete nao saia da tela
-        player1Y = math.max(0, player1Y - PADDLE_SPEED * dt)
+        player1.dy = -PADDLE_SPEED
     elseif (love.keyboard.isDown("s")) then
-        -- garante que a raquete nao saia da tela
-        player1Y = math.min(VIRTUAL_HEIGHT - 20, player1Y + PADDLE_SPEED * dt)
+        player1.dy = PADDLE_SPEED
+    else
+        player1.dy = 0
     end
 
     -- movimento do jogador 2
     if(love.keyboard.isDown("up")) then
-        player2Y = math.max(0, player2Y - PADDLE_SPEED * dt)
+         player2.dy = -PADDLE_SPEED
     elseif (love.keyboard.isDown("down")) then
-        player2Y = math.min(VIRTUAL_HEIGHT - 20, player2Y + PADDLE_SPEED * dt)
+        player2.dy = PADDLE_SPEED
+    else
+        player2.dy = 0
     end
 
     if gameState == "play" then
         -- movimento da bola, a multiplacacao por dt é para ser independente do da taxa de quadros
-        ballX = ballX + ballDX * dt
-        ballY = ballY + ballDY * dt
+        ball:update(dt)
     end
+
+    player1:update(dt)
+    player2:update(dt)
     
 end
 
@@ -101,12 +108,8 @@ function love.keypressed(key)
             gameState = "play"
         else
             gameState = "start"
-            -- bola inicia no centro da tela
-            ballX = VIRTUAL_WIDTH / 2 - 2
-            ballY = VIRTUAL_HEIGHT / 2 - 2
-            -- bola inicia com uma velocidade aleatoria
-            ballDX = math.random(2) == 1 and 100 or -100
-            ballDY = math.random(-50, 50) * 1.5
+     
+            ball:reset()
         end
     end
 end
@@ -133,31 +136,13 @@ function love.draw()
     love.graphics.print(tostring(player2Score), VIRTUAL_WIDTH / 2 + 30, VIRTUAL_HEIGHT / 3)
 
     --renderiza primeira raquete (esquerda)
-    love.graphics.rectangle(
-        "fill",
-        10,
-        player1Y,
-        5,
-        20
-    )
+    player1:render()
 
     --renderiza segunda raquete (direita)
-    love.graphics.rectangle(
-        "fill",
-        VIRTUAL_WIDTH - 10,
-        player2Y,
-        5,
-        20
-    )
+    player2Y:render()
 
     --renderiza bola (centro)
-    love.graphics.rectangle(
-        "fill",
-        ballX,
-        ballY,
-        5,
-        5
-    )
+    ball:render()
 
     push:apply('end')
 end
