@@ -32,6 +32,9 @@ function love.load()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
 
+    -- seed aleatória usando os segundos desde 1 janeiro de 1970
+    math.randomseed(os.time())
+    
     --fonte retro
     smallFont = love.graphics.newFont("font.ttf", 8)
 
@@ -50,21 +53,40 @@ function love.load()
     -- posicao das raquetes no eixo Y
     player1Y = 30
     player2Y = VIRTUAL_HEIGHT - 50
+
+    -- posicao da bola no eixo X e Y
+    ballX = VIRTUAL_WIDTH / 2 - 2
+    ballY = VIRTUAL_HEIGHT / 2 - 2
+
+    -- velocidade da bola no eixo X e Y
+    ballDX = math.random(2) == 1 and 100 or -100
+    ballDY = math.random(-50, 50)
+
+    gameState = "start"
+
 end
 
 function love.update(dt)
     -- movimento do jogador 1, no eixo Y pra cima e negativo e para baixo e positivo
     if(love.keyboard.isDown("w")) then
-        player1Y = player1Y - PADDLE_SPEED * dt
+        -- garante que a raquete nao saia da tela
+        player1Y = math.max(0, player1Y - PADDLE_SPEED * dt)
     elseif (love.keyboard.isDown("s")) then
-        player1Y = player1Y + PADDLE_SPEED * dt
+        -- garante que a raquete nao saia da tela
+        player1Y = math.min(VIRTUAL_HEIGHT - 20, player1Y + PADDLE_SPEED * dt)
     end
 
     -- movimento do jogador 2
     if(love.keyboard.isDown("up")) then
-        player2Y = player2Y - PADDLE_SPEED * dt
+        player2Y = math.max(0, player2Y - PADDLE_SPEED * dt)
     elseif (love.keyboard.isDown("down")) then
-        player2Y = player2Y + PADDLE_SPEED * dt
+        player2Y = math.min(VIRTUAL_HEIGHT - 20, player2Y + PADDLE_SPEED * dt)
+    end
+
+    if gameState == "play" then
+        -- movimento da bola, a multiplacacao por dt é para ser independente do da taxa de quadros
+        ballX = ballX + ballDX * dt
+        ballY = ballY + ballDY * dt
     end
     
 end
@@ -74,6 +96,18 @@ end
 function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
+    elseif key == "enter" or key == "return" then
+        if gameState == "start" then
+            gameState = "play"
+        else
+            gameState = "start"
+            -- bola inicia no centro da tela
+            ballX = VIRTUAL_WIDTH / 2 - 2
+            ballY = VIRTUAL_HEIGHT / 2 - 2
+            -- bola inicia com uma velocidade aleatoria
+            ballDX = math.random(2) == 1 and 100 or -100
+            ballDY = math.random(-50, 50) * 1.5
+        end
     end
 end
 
@@ -119,8 +153,8 @@ function love.draw()
     --renderiza bola (centro)
     love.graphics.rectangle(
         "fill",
-        VIRTUAL_WIDTH / 2 - 2,
-        VIRTUAL_HEIGHT / 2 - 2,
+        ballX,
+        ballY,
         5,
         5
     )
